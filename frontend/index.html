@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunari Studio - Connexion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 400px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .toggle-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .toggle-text span {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .toggle-text span:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <!-- Register Form -->
+    <div id="registerForm">
+        <h2>✨ Créer un compte</h2>
+        <div class="subtitle">Rejoignez l'aventure Lunari Studio</div>
+        
+        <div id="registerError" class="error-message" style="display: none;"></div>
+        <div id="registerSuccess" class="success-message" style="display: none;"></div>
+        
+        <form id="registerFormElement">
+            <div class="form-group">
+                <label for="reg-email">📧 Adresse Gmail</label>
+                <input type="email" id="reg-email" name="email" required placeholder="exemple@gmail.com">
+            </div>
+            <div class="form-group">
+                <label for="reg-name">👤 Nom d'utilisateur</label>
+                <input type="text" id="reg-name" name="name" placeholder="Comment veux-tu t'appeler ?">
+            </div>
+            <div class="form-group">
+                <label for="reg-password">🔒 Mot de passe</label>
+                <input type="password" id="reg-password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit">🚀 S'inscrire</button>
+        </form>
+        <p class="toggle-text">Déjà un compte ? <span onclick="switchForm('login')">Se connecter</span></p>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm" style="display: none;">
+        <h2>🎭 Lunari Studio</h2>
+        <div class="subtitle">Retrouve ton univers créatif</div>
+        
+        <div id="loginError" class="error-message" style="display: none;"></div>
+        
+        <form id="loginFormElement">
+            <div class="form-group">
+                <label for="login-email">📧 Email</label>
+                <input type="email" id="login-email" name="email" required placeholder="exemple@gmail.com">
+            </div>
+            <div class="form-group">
+                <label for="login-password">🔒 Mot de passe</label>
+                <input type="password" id="login-password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit">🌟 Se connecter</button>
+        </form>
+        <p class="toggle-text">Nouveau ici ? <span onclick="switchForm('register')">Créer un compte</span></p>
+    </div>
+</div>
+
+<script>
+    // API Base URL
+    const API_URL = 'http://localhost:3000/api';
+
+    function showError(elementId, message) {
+        const errorDiv = document.getElementById(elementId);
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 4000);
+    }
+
+    function showSuccess(elementId, message) {
+        const successDiv = document.getElementById(elementId);
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        setTimeout(() => {
+            successDiv.style.display = 'none';
+        }, 3000);
+    }
+
+    // Stocker les tokens
+    function storeTokens(accessToken, refreshToken, user) {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(user));
+    }
+
+    // Register
+    document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const name = document.getElementById('reg-name').value;
+        
+        const submitBtn = e.target.querySelector('button');
+        submitBtn.classList.add('loading');
+        
+        try {
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, name })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showSuccess('registerSuccess', 'Inscription réussie ! Redirection...');
+                storeTokens(data.accessToken, data.refreshToken, data.user);
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1500);
+            } else {
+                showError('registerError', data.error || 'Erreur lors de l\'inscription');
+            }
+        } catch (error) {
+            showError('registerError', 'Erreur de connexion au serveur');
+        } finally {
+            submitBtn.classList.remove('loading');
+        }
+    });
+    
+    // Login
+    document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        const submitBtn = e.target.querySelector('button');
+        submitBtn.classList.add('loading');
+        
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                storeTokens(data.accessToken, data.refreshToken, data.user);
+                window.location.href = '/dashboard.html';
+            } else {
+                showError('loginError', data.error || 'Email ou mot de passe incorrect');
+            }
+        } catch (error) {
+            showError('loginError', 'Erreur de connexion au serveur');
+        } finally {
+            submitBtn.classList.remove('loading');
+        }
+    });
+    
+    // Switch form
+    function switchForm(type) {
+        if (type === 'login') {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        } else {
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
